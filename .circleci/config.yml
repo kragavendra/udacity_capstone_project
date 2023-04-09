@@ -1,8 +1,5 @@
-# Python CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-python/ for more details
-#
-version: 2
+version: 2.1
+
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -22,7 +19,7 @@ commands:
 
 
 jobs:
-  build:
+  build-environment:
     docker:
       # Use the same Docker base as the project
       - image: python:3.7.3-stretch
@@ -93,7 +90,7 @@ jobs:
 workflows:
   default:
     jobs:
-      - build
+      - build-environment
       - create-blue-version:
           requires: [build]
       - build-docker-image:
