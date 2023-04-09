@@ -65,8 +65,7 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/cloudfront.yml \
-              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
-              --stack-name BlueVersion-<< parameters.Workflow_ID >>
+              --stack-name BlueVersion-${CIRCLE_WORKFLOW_ID:0:7}
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
