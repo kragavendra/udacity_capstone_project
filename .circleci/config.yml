@@ -11,7 +11,7 @@ commands:
             unzip awscliv2.zip
             sudo ./aws/install
   destroy-environment:
-    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    description: Destroy cloudformation stacks given a workflow ID.
     parameters:
       # Added workflow ID for destroying the environment related files
       Workflow_ID:
@@ -32,6 +32,21 @@ commands:
             kubectl delete -f deployment/
             eksctl delete cluster wordle-${CIRCLE_WORKFLOW_ID:0:7}
 
+destroy-blue-version:
+    description: Destroy blue versrion stack given a workflow ID.
+    parameters:
+      # Added workflow ID for destroying the environment related files
+      Workflow_ID:
+        type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
+    steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: |
+            # logic to delete blue version
+            aws cloudformation delete-stack --stack-name BlueVersion-<< parameters.Workflow_ID >>
+            aws s3 rm s3://wordle-random --recursive
 
 jobs:
   build-lint:
@@ -141,6 +156,31 @@ jobs:
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
+    smoke-test:
+      executor: aws-eks/python3
+      steps:
+        - kubernetes/install
+        - aws-eks/update-kubeconfig-with-authenticator:
+            cluster-name: Cluster-${CIRCLE_WORKFLOW_ID:0:7}
+        - run:
+            name: check new cluster details
+            command: |
+              kubectl get services
+              kubectl get pods
+              kubectl get deployment
+              kubectl get nodes
+      # Here's where you will add some code to rollback on failure  
+      - destroy-environment
+
+    destroy-blue-version:
+      docker:
+      - image: cimg/base:stable
+    steps:
+      # Checkout code from git
+      - checkout
+      - install_awscli
+      - destroy-blue-version
+
 
 workflows:
   default:
@@ -150,7 +190,11 @@ workflows:
           requires: [build-lint]
       - build-docker-image:
           requires: [create-blue-version]
-      - create-green-cluster
+      - create-green-cluster:
           requires: [build-docker-image]
-      - deploy-green-cluster
-
+      - deploy-green-cluster:
+          requires: [create-green-cluster]
+      - smoke-test:
+          requires: [deploy-green-cluster]
+      - destroy-blue-version:
+          requires: [smoke-test]
