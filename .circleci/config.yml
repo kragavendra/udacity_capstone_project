@@ -57,39 +57,44 @@ jobs:
             . venv/bin/activate 
             make lint
 
-    create-blue-version:
-      docker:
-        - image: cimg/base:stable
-      steps:
-        # Checkout code from git
-        - checkout
-        - run:
-            name: Update cloudfront distribution
-            command: |
-              aws cloudformation deploy \
-                --template-file .circleci/files/cloudfront.yml \
-                --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
-                --stack-name BlueVersion-<< parameters.Workflow_ID >>
-        # Here's where you will add some code to rollback on failure  
-        - destroy-environment
+  create-blue-version:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Checkout code from git
+      - checkout
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/cloudfront.yml \
+              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name BlueVersion-<< parameters.Workflow_ID >>
+      # Here's where you will add some code to rollback on failure  
+      - destroy-environment
 
-    build-docker-image:
-      working_directory: ~/apps
-      docker:
-        - image: docker:stable
-      steps:
-        - checkout
-        - setup_remote_docker
-        - run:
-            name: build and publish docker image
-            command: |
-              docker build -t wordle .
-              echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USERNAME --password-stdin
-              docker tag wordle kragavendra1100/wordle
-              docker push kragavendra1100/wordle
-        # Here's where you will add some code to rollback on failure  
-        - destroy-environment
+  build-docker-image:
+    working_directory: ~/apps
+    docker:
+      - image: docker:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: build and publish docker image
+          command: |
+            docker build -t wordle .
+            echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USERNAME --password-stdin
+            docker tag wordle kragavendra1100/wordle
+            docker push kragavendra1100/wordle
+      # Here's where you will add some code to rollback on failure  
+      - destroy-environment
 
-
-
-
+workflows:
+  default:
+    jobs:
+      - build
+      - create-blue-version:
+          requires: [build]
+      - build-docker-image:
+          requires: [create-blue-version]
