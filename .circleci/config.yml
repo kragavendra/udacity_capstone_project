@@ -135,6 +135,7 @@ jobs:
             mkdir -p $HOME/bin && cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$PATH:$HOME/bin
             echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
             aws-iam-authenticator help
+            aws configure --profile default
             # download the eks ctl
             curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
             # move the eksctl to bin directory /usr/local/bin
@@ -195,12 +196,12 @@ workflows:
   default:
     jobs:
       - build-lint
-      - create-blue-version:
-          requires: [build-lint]
-      - build-docker-image:
-          requires: [create-blue-version]
+#      - create-blue-version:
+#          requires: [build-lint]
+#      - build-docker-image:
+#          requires: [create-blue-version]
       - create-green-cluster:
-          requires: [build-docker-image]
+          requires: [build-lint]
       - deploy-green-cluster:
           requires: [create-green-cluster]
       - smoke-test:
