@@ -1,6 +1,15 @@
 version: 2.1
 
 commands:
+  install_awscli:
+    description: Install AWS CLI v2
+    steps:
+      - run:
+          name: Install AWS CLI v2
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -19,7 +28,7 @@ commands:
 
 
 jobs:
-  build-environment:
+  build-lint:
     docker:
       # Use the same Docker base as the project
       - image: python:3.7.3-stretch
@@ -60,6 +69,7 @@ jobs:
     steps:
       # Checkout code from git
       - checkout
+      - install_awscli
       - run:
           name: Update cloudfront distribution
           command: |
@@ -89,8 +99,8 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-environment
+      - build-lint
       - create-blue-version:
-          requires: [build-environment]
+          requires: [build-lint]
       - build-docker-image:
           requires: [create-blue-version]
