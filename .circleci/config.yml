@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  aws-eks: circleci/aws-eks@1.0.0
+  aws-eks: circleci/aws-eks@1.2.0
   kubernetes: circleci/kubernetes@0.11.1
 
 commands:
@@ -124,19 +124,14 @@ jobs:
 
   create-green-cluster:
     executor: aws-eks/python3
+    - aws-eks/install-aws-iam-authenticator:
+        release-tag: v0.5.6
     steps:
       - checkout
       - install_awscli
       - run:
           name:
           command: |
-            #install aws-iam-authenticator
-            curl -o aws-iam-authenticator https://s3.us-west-2.amazonaws.com/amazon-eks/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator
-            chmod +x ./aws-iam-authenticator
-            mkdir -p $HOME/bin && cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$PATH:$HOME/bin
-            echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
-            aws-iam-authenticator help
-            aws configure --profile default
             # download the eks ctl
             curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
             # move the eksctl to bin directory /usr/local/bin
