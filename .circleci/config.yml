@@ -126,6 +126,7 @@ jobs:
     executor: aws-eks/python3
     steps:
       - checkout
+      - install_awscli
       - run:
           name:
           command: |
