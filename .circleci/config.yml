@@ -156,31 +156,32 @@ jobs:
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
-    smoke-test:
-      executor: aws-eks/python3
-      steps:
-        - kubernetes/install
-        - aws-eks/update-kubeconfig-with-authenticator:
-            cluster-name: Cluster-${CIRCLE_WORKFLOW_ID:0:7}
-        - run:
-            name: check new cluster details
-            command: |
-              kubectl get services
-              kubectl get pods
-              kubectl get deployment
-              kubectl get nodes
+  smoke-test:
+    executor: aws-eks/python3
+    steps:
+      - kubernetes/install
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: Cluster-${CIRCLE_WORKFLOW_ID:0:7}
+      - run:
+          name: check new cluster details
+          command: |
+            kubectl get services
+            kubectl get pods
+            kubectl get deployment
+            kubectl get nodes
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
-    destroy-blue-version:
-      docker:
-      - image: cimg/base:stable
+  destroy-blue-version:
+    docker:
+    - image: cimg/base:stable
     steps:
       # Checkout code from git
       - checkout
       - install_awscli
       - destroy-blue-version
-
+      # Here's where you will add some code to rollback on failure  
+      - destroy-environment
 
 workflows:
   default:
