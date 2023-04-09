@@ -60,18 +60,18 @@ jobs:
     create-blue-version:
       docker:
         - image: cimg/base:stable
-        steps:
-          # Checkout code from git
-          - checkout
-          - run:
-              name: Update cloudfront distribution
-              command: |
-                aws cloudformation deploy \
-                  --template-file .circleci/files/cloudfront.yml \
-                  --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
-                  --stack-name BlueVersion-<< parameters.Workflow_ID >>
-          # Here's where you will add some code to rollback on failure  
-          - destroy-environment
+      steps:
+        # Checkout code from git
+        - checkout
+        - run:
+            name: Update cloudfront distribution
+            command: |
+              aws cloudformation deploy \
+                --template-file .circleci/files/cloudfront.yml \
+                --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
+                --stack-name BlueVersion-<< parameters.Workflow_ID >>
+        # Here's where you will add some code to rollback on failure  
+        - destroy-environment
 
     build-docker-image:
       working_directory: ~/apps
