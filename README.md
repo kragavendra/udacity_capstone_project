@@ -22,7 +22,7 @@ Step 3: Setup Infrastructure
     I have used CloudFormation to build infrastructure. As part of the cloudformation stack, I am creating a EKS cluster for deploying the app
 
 Step 4: Build your pipeline
-    the pipeline used for this project is tagged to GitHub repository link - https://github.com/kragavendra/udacity_captsone_project
+    the pipeline used for this project is tagged to GitHub repository link - https://github.com/kragavendra/udacity_capstone_project
     high level pipeline steps 
         checkout -> install dependecies -> lint -> build docker image -> upload docker image -> create EKS cluster -> perform Blue/Green Deployment switch 
 

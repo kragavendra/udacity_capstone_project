@@ -108,7 +108,7 @@ jobs:
     steps:
       - checkout
       - aws-eks/install-iam-authenticator:
-        release-tag:''
+          release-tag: ''
       -run
         name:
         command: |
@@ -141,9 +141,6 @@ jobs:
           resource-name: deployment/wordle
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
-
-
-
 
 
 workflows:
