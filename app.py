@@ -45,7 +45,7 @@ def begin():
     except requests.exceptions.RequestException: # just handle exceptions regarding HTTP
         return Response("Something went wrong to retrieve data", mimetype='text/plain')
 
-    lenWord=str(len(session["word"]))
+    lenWord=str(len(session["word"]))Fail
     print("------------------------------\nWord is :",session["word"])
     # print(lenWord,"letters (begin1)")
     score=request.cookies.get("score_cookie")
