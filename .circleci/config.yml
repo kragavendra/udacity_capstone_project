@@ -14,6 +14,7 @@ commands:
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
+
   destroy-environment:
     description: Destroy cloudformation stacks given a workflow ID.
     parameters:
@@ -154,8 +155,7 @@ jobs:
     executor: aws-eks/python3
     steps:
       - checkout
-      - aws-eks/install-iam-authenticator:
-        release-tag: ''
+      - aws-eks/install-iam-authenticator
       - run:
           name:
           command: |
