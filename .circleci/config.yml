@@ -124,10 +124,10 @@ jobs:
 
   create-green-cluster:
     executor: aws-eks/python3
-    - aws-eks/install-aws-iam-authenticator:
-        release-tag: v0.5.6
     steps:
       - checkout
+      - aws-eks/install-aws-iam-authenticator:
+        release-tag: 'v0.5.6'
       - install_awscli
       - run:
           name:
