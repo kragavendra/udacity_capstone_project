@@ -1,4 +1,8 @@
 version: 2.1
+orbs:
+  aws-eks: circleci/aws-eks@1.0.0
+  kubernetes: circleci/kubernetes@0.11.1
+  slack: circleci/slack@4.1
 
 commands:
   install_awscli:
@@ -83,6 +87,16 @@ jobs:
           command: |
             . venv/bin/activate 
             make lint
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: fail
+          mentions: '@EngineeringTeam'
+          template: basic_fail_1
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: pass
+          template: success_tagged_deploy_1
+      
 
   create-blue-version:
     docker:
@@ -98,6 +112,15 @@ jobs:
               --template-file .circleci/files/cloudfront.yml \
               --stack-name "BlueVersion-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: fail
+          mentions: '@EngineeringTeam'
+          template: basic_fail_1
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: pass
+          template: success_tagged_deploy_1
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
@@ -115,6 +138,15 @@ jobs:
             echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USERNAME --password-stdin
             docker tag wordle kragavendra1100/wordle
             docker push kragavendra1100/wordle
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: fail
+          mentions: '@EngineeringTeam'
+          template: basic_fail_1
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: pass
+          template: success_tagged_deploy_1
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
@@ -139,7 +171,16 @@ jobs:
           nodes-max: 2
           ssh-access: false
           ssh-public-key: ''
-        # Here's where you will add some code to rollback on failure  
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: fail
+          mentions: '@EngineeringTeam'
+          template: basic_fail_1
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: pass
+          template: success_tagged_deploy_1
+      # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
   deploy-green-cluster:
@@ -153,6 +194,15 @@ jobs:
       - kubernetes/create-or-update-resource:
           resource-file-path: deployment.yml
           resource-name: deployment/wordle
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: fail
+          mentions: '@EngineeringTeam'
+          template: basic_fail_1
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: pass
+          template: success_tagged_deploy_1
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
@@ -169,6 +219,15 @@ jobs:
             kubectl get pods
             kubectl get deployment
             kubectl get nodes
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: fail
+          mentions: '@EngineeringTeam'
+          template: basic_fail_1
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: pass
+          template: success_tagged_deploy_1
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
@@ -180,6 +239,15 @@ jobs:
       - checkout
       - install_awscli
       - destroy-blue-version
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: fail
+          mentions: '@EngineeringTeam'
+          template: basic_fail_1
+      - slack/notify:
+          channel: #udapeople-alerts
+          event: pass
+          template: success_tagged_deploy_1
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
