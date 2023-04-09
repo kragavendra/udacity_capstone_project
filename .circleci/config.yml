@@ -37,7 +37,7 @@ commands:
             kubectl delete -f deployment/
             eksctl delete cluster wordle-${CIRCLE_WORKFLOW_ID:0:7}
 
-destroy-blue-version:
+  destroy-blue-environment:
     description: Destroy blue versrion stack given a workflow ID.
     parameters:
       # Added workflow ID for destroying the environment related files
@@ -243,7 +243,7 @@ jobs:
       # Checkout code from git
       - checkout
       - install_awscli
-      - destroy-blue-version
+      - destroy-blue-environment
       - slack/notify:
           channel: #udapeople-alerts
           event: fail
