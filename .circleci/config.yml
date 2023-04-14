@@ -35,8 +35,8 @@ commands:
             kubectl delete -f deployment/
             eksctl delete cluster wordle-${CIRCLE_WORKFLOW_ID:0:7}
 
-  destroy-old-version:
-    description: Destroy old version stack given a workflow ID.
+  destroy-old-environment:
+    description: Destroy old environment stack given a workflow ID.
     parameters:
       # Added workflow ID for destroying the environment related files
       Workflow_ID:
@@ -49,7 +49,6 @@ commands:
           command: |
             # logic to delete blue version
             aws cloudformation delete-stack --stack-name BlueVersion-<< parameters.Workflow_ID >>
-            aws s3 rm s3://wordle-random --recursive
 
 jobs:
   build-lint:
