@@ -146,15 +146,15 @@ jobs:
       - run:
           name: watch rollout
           command: | 
-            kubectl rollout status kragavendra1100/wordle
+            kubectl rollout status deployment.apps/wordle
       - run:
           name: rolling update
           command: |
-            kubectl set image kragavendra1100/wordle mycontainer=wordle:latest
+            kubectl set image deployment.apps/wordle mycontainer=kragavendra1100/wordle
       - run:
           name: watch rollout
           command: | 
-            kubectl rollout status kragavendra1100/wordle
+            kubectl rollout status deployment.apps/wordle
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
