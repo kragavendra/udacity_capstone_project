@@ -46,7 +46,6 @@ commands:
           when: on_fail
           command: |
             aws eks update-kubeconfig --name=wordle
-            export KUBECONFIG=/root/.kube/config
             kubectl get svc
             kubectl delete -f deployment/
             eksctl delete cluster wordle
@@ -115,14 +114,8 @@ jobs:
       - run:
           name: create cluster
           command: |
-            aws eks describe-cluster --name wordle > /dev/null
-            if [ $? -eq 0 ] 
-            then   
-              echo "Cluster already exists"; 
-            else
-              echo "Create Cluster"
-              eksctl create cluster --config-file=cluster.yml
-            fi
+            echo "Create Cluster"
+            eksctl create cluster --config-file=cluster.yml
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
@@ -142,11 +135,7 @@ jobs:
       - run: 
           name: deploy app
           command: |
-            kubectl apply -f deployment.yml 
-      - run:
-          name: watch rollout
-          command: | 
-            kubectl rollout status deployment.apps/wordle
+            kubectl apply -f deployment.yml
       - run:
           name: rolling update
           command: |

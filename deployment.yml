@@ -10,7 +10,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 2
       maxUnavailable: 0
   selector:
     matchLabels:
@@ -32,7 +32,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: wordle-loadbalancer
+  name: wordle
   labels:
     app: wordle
     
@@ -41,6 +41,6 @@ spec:
     app: wordle
   ports:
     - protocol: TCP
-      port: 5000
-      targetPort: 80
+      port: 80
+      targetPort: 5000
   type: LoadBalancer
