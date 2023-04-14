@@ -113,14 +113,8 @@ jobs:
       - run:
           name: create cluster
           command: |
-            result=$(aws eks list-clusters|grep 'wordle-cluster')
-            if [ $result -ne "" ]
-            then
-              echo "Cluster already exists"
-            else
-              echo "Create Cluster"
-              eksctl create cluster --config-file=cluster.yml
-            fi
+            echo "Create Cluster"
+            eksctl create cluster --config-file=cluster.yml
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
