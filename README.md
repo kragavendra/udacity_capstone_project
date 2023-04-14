@@ -18,7 +18,7 @@ Step 2: Pick Deployment strategy & Tool
     I have used Circle CI tool to perform Rolling Update deployment. 
 
 Step 3: Setup Infrastructure 
-    I have used CloudFormation to build infrastructure. As part of the cloudformation stack, I am creating a EKS cluster & deploying the app
+    I am using EKSCTL for creating EKS cluster(which is using cloud formation for creating the infrastructure) & deploying the app
 
 Step 4: Build your pipeline
     the pipeline used for this project is tagged to GitHub repository link - https://github.com/kragavendra/udacity_capstone_project
