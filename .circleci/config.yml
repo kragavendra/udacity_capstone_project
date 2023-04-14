@@ -21,7 +21,7 @@ commands:
           name: install eksctl
           command: |
             curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-            mv /tmp/eksctl /usr/local/bin
+            sudo mv /tmp/eksctl /usr/local/bin
             eksctl version
 
   install-kubectl:
@@ -30,12 +30,12 @@ commands:
       - run:
           name: install kubectl
           command: |
-            apt-get update
-            apt-get install -y apt-transport-https ca-certificates curl
+            sudo apt-get update
+            sudo apt-get install -y apt-transport-https ca-certificates curl
             curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
             echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
-            apt-get update
-            apt-get install -y kubectl
+            sudo apt-get update
+            sudo apt-get install -y kubectl
 
   destroy-environment:
     description: Destroy cloudformation stacks given a workflow ID.
@@ -159,7 +159,7 @@ jobs:
   smoke-test:
     working_directory: ~/apps
     docker:
-      - image: 'weaveworks/eksctl:latest'
+      - image: 'cimg/base:2023.04'
     steps:
       - checkout
       - install-kubectl
