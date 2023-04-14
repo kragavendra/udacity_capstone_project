@@ -176,14 +176,14 @@ jobs:
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
-  destroy-blue-version:
+  destroy-old-version:
     docker:
       - image: cimg/base:stable
     steps:
       # Checkout code from git
       - checkout
       - install_awscli
-      - destroy-blue-environment
+      - destroy-old-environment
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
