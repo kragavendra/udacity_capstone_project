@@ -113,7 +113,7 @@ jobs:
       - run:
           name: create cluster
           command: |
-            aws eks describe-cluster --name wordle-cluster > /dev/null
+            aws eks describe-cluster --name wordle-cluster 2> /dev/null
             if [ $? -eq 0 ]
             then
               echo "Cluster already exists"
@@ -167,7 +167,7 @@ jobs:
       - run:
           name: connect to eks cluster
           command: | 
-            aws eks --region eu-central-1 update-kubeconfig --name wordle-cluster
+            aws eks --region us-west-2 update-kubeconfig --name wordle-cluster
             kubectl get svc
       - run:
           name: list kubectl resources
