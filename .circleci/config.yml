@@ -186,12 +186,14 @@ jobs:
 workflows:
   default:
     jobs:
-#      - build-lint
-#      - create-upload-docker-image:
-#          requires: [build-lint]
       - create-infrastructure:
-#          requires: [create-upload-docker-image]
       - deploy-app:
           requires: [create-infrastructure]
       - smoke-test:
           requires: [deploy-app]
+
+#      - build-lint
+#      - create-upload-docker-image:
+#          requires: [build-lint]
+#      - create-infrastructure:
+#          requires: [create-upload-docker-image]
