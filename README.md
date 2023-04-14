@@ -15,16 +15,15 @@ Step 1: Project Scope
     In this project, I am deploying a simple wordle game app(sourced from internet) in AWS EKS  
 
 Step 2: Pick Deployment strategy & Tool 
-    I have used Circle CI tool to perform Blue/Green deployment. 
-    Blue version is a static webpage for the wordle game in S3. Green version is the working app on cluster
+    I have used Circle CI tool to perform Rolling Update deployment. 
 
 Step 3: Setup Infrastructure 
-    I have used CloudFormation to build infrastructure. As part of the cloudformation stack, I am creating a EKS cluster for deploying the app
+    I have used CloudFormation to build infrastructure. As part of the cloudformation stack, I am creating a EKS cluster & deploying the app
 
 Step 4: Build your pipeline
     the pipeline used for this project is tagged to GitHub repository link - https://github.com/kragavendra/udacity_capstone_project
     high level pipeline steps 
-        checkout -> install dependecies -> lint -> build docker image -> upload docker image -> create EKS cluster -> perform Blue/Green Deployment switch 
+        install dependecies & lint -> build & upload docker image -> create EKS cluster -> perform rolling update
 
 Step 5: Test your pipeline
     Perform builds on your pipeline.

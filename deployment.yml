@@ -4,39 +4,43 @@ metadata:
   name: wordle
   labels:
     app: wordle
-  namespace: default
+    
 spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: wordle
-  replicas: 2
-  strategy:
-    type: Create
   template:
     metadata:
       labels:
         app: wordle
+        
     spec:
       containers:
       - name: wordle
-        image: kragavendra1100/wordle:latest
+        image: kragavendra1100/wordle
         imagePullPolicy: Always
         ports:
         - containerPort: 80
-
+  
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: wordle
+  name: wordle-loadbalancer
   labels:
-    name: wordle
+    app: wordle
+    
 spec:
   selector:
     app: wordle
-  type: LoadBalancer
   ports:
-    - name: http
-      protocol: TCP
+    - protocol: TCP
       port: 5000
       targetPort: 80
+  type: LoadBalancer

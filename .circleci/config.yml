@@ -14,50 +14,49 @@ commands:
             unzip awscliv2.zip
             sudo ./aws/install
 
+  install-eksctl:
+    description: install eksctl on ubuntu
+    steps:
+      - run:
+          name: install eksctl
+          command: |
+            curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+            mv /tmp/eksctl /usr/local/bin
+            eksctl version
+
+  install-kubectl:
+    description: install kubectl
+    steps:
+      - run:
+          name: install kubectl
+          command: |
+            apt-get update
+            apt-get install -y apt-transport-https ca-certificates curl
+            curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+            echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
+            apt-get update
+            apt-get install -y kubectl
+
   destroy-environment:
     description: Destroy cloudformation stacks given a workflow ID.
-    parameters:
-      # Added workflow ID for destroying the environment related files
-      Workflow_ID:
-        type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}
     steps:
       - run:
           name: Destroy environments
           when: on_fail
           command: |
-            # logic to delete blue version
-            aws cloudformation delete-stack --stack-name BlueVersion-<< parameters.Workflow_ID >>
-            # logic to delete green version
-            aws eks update-kubeconfig --name="wordle-${CIRCLE_WORKFLOW_ID:0:7}"
+            aws eks update-kubeconfig --name=wordle-cluster
             export KUBECONFIG=/root/.kube/config
             kubectl get svc
             kubectl delete -f deployment/
-            eksctl delete cluster wordle-${CIRCLE_WORKFLOW_ID:0:7}
+            eksctl delete cluster wordle-cluster
 
-  destroy-old-environment:
-    description: Destroy old environment stack given a workflow ID.
-    parameters:
-      # Added workflow ID for destroying the environment related files
-      Workflow_ID:
-        type: string
-        default: ${CIRCLE_WORKFLOW_ID:0:7}
-    steps:
-      - run:
-          name: Destroy environments
-          when: on_fail
-          command: |
-            # logic to delete blue version
-            aws cloudformation delete-stack --stack-name BlueVersion-<< parameters.Workflow_ID >>
 
 jobs:
   build-lint:
     docker:
       # Use the same Docker base as the project
       - image: python:3.7.3-stretch
-
     working_directory: ~/repo
-
     steps:
       - checkout
       # Download and cache dependencies
@@ -86,23 +85,6 @@ jobs:
             . venv/bin/activate 
             make lint
 
-  create-blue-version:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      # Checkout code from git
-      - checkout
-      - install_awscli
-      - run:
-          name: Update cloudfront distribution
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/cloudfront.yml \
-              --stack-name "BlueVersion-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
-      # Here's where you will add some code to rollback on failure  
-      - destroy-environment
-
   build-docker-image:
     working_directory: ~/apps
     docker:
@@ -121,68 +103,83 @@ jobs:
       - destroy-environment
 
   create-infrastructure:
-    executor: aws-eks/python3
+    working_directory: ~/apps
+    docker:
+      - image: 'weaveworks/eksctl:latest'
     steps:
       - checkout
-      - aws-eks/install-aws-iam-authenticator:
-        release-tag: 'v0.5.6'
-      - install_awscli
+      - install-eksctl
+      - install-aws
       - run:
-          name:
+          name: create cluster
           command: |
-            # download the eks ctl
-            curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-            # move the eksctl to bin directory /usr/local/bin
-            sudo mv /tmp/eksctl /usr/local/bin
-      - aws-eks/create-cluster:
-          cluster-name: wordle-${CIRCLE_WORKFLOW_ID:0:7}
-          skip-kubectl-install: false
-          verbose: 3
-          node-type: t2.micro
-          nodes-max: 2
-          ssh-access: false
-          ssh-public-key: ''
+            aws eks describe-cluster --name wordle-cluster > /dev/null
+            if [ $? -eq 0 ]
+            then
+              echo "Cluster already exists"
+            else
+              echo "Create Cluster"
+              eksctl create cluster --config-file=cluster.yml
+            fi 
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
   deploy-app:
-    executor: aws-eks/python3
+    working_directory: ~/apps
+    docker:
+      - image: 'docker:stable'
     steps:
       - checkout
-      - kubernetes/install
-      - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: wordle-${CIRCLE_WORKFLOW_ID:0:7}
-          install-kubectl: true
-      - kubernetes/create-or-update-resource:
-          resource-file-path: deployment.yml
-          resource-name: deployment/wordle
+      - install-kubectl
+      - install-aws
+      - run:
+          name: connect to eks cluster
+          command: | 
+            aws eks --region us-west-2 update-kubeconfig --name wordle-cluster
+            kubectl get svc
+      - run: 
+          name: deploy app
+          command: |
+            kubectl apply -f deployment.yml 
+      - run:
+          name: watch rollout
+          command: | 
+            kubectl rollout status kragavendra1100/wordle
+      - run:
+          name: rolling update
+          command: |
+            kubectl set image kragavendra1100/wordle mycontainer=wordle:latest
+      - run:
+          name: watch rollout
+          command: | 
+            kubectl rollout status kragavendra1100/wordle
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
   smoke-test:
-    executor: aws-eks/python3
-    steps:
-      - kubernetes/install
-      - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: Cluster-${CIRCLE_WORKFLOW_ID:0:7}
-      - run:
-          name: check new cluster details
-          command: |
-            kubectl get services
-            kubectl get pods
-            kubectl get deployment
-            kubectl get nodes
-      # Here's where you will add some code to rollback on failure  
-      - destroy-environment
-
-  destroy-old-version:
+    working_directory: ~/apps
     docker:
-      - image: cimg/base:stable
+      - image: 'weaveworks/eksctl:latest'
     steps:
-      # Checkout code from git
       - checkout
-      - install_awscli
-      - destroy-old-environment
+      - install-kubectl
+      - install-aws
+      - run:
+          name: connect to eks cluster
+          command: | 
+            aws eks --region eu-central-1 update-kubeconfig --name wordle-cluster
+            kubectl get svc
+      - run:
+          name: list kubectl resources
+          command: |
+            echo "List Deployments:"
+            kubectl get deployments
+            echo ""
+            echo "List Services:"
+            kubectl get svc
+            echo ""
+            echo "List Pods:"
+            kubectl get pods
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
@@ -198,5 +195,3 @@ workflows:
           requires: [create-infrastructure]
       - smoke-test:
           requires: [deploy-app]
-      - destroy-old-version:
-          requires: [smoke-test]
