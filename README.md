@@ -1,3 +1,5 @@
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/kragavendra/udacity_capstone_project/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/kragavendra/udacity_capstone_project/tree/main)
+
 Cloud DevOps Nanodegree Capstone Project
 
 In this project I will apply the skills and knowledge which were developed throughout the Cloud DevOps Nanodegree program. These include:
@@ -26,13 +28,6 @@ Step 4: Build your pipeline
         install dependecies & lint -> build & upload docker image -> create EKS cluster -> perform rolling update
 
 Step 5: Test your pipeline
-    Perform builds on your pipeline.
+    completed a working pipeline test and attached the screenshots
     
-    Verify that your pipeline works as you designed it. Take a screenshot of the Circle CI or Jenkins pipeline showing the deployment, and all stages passed successfully.
-    
-    Take a screenshot of your AWS EC2 page showing the newly created (for blue/green) or modified (for rolling) instances running as the EKS cluster nodes. Make sure you name your instances differently between blue and green deployments.
-
-    Take a screenshot of the kubectl command output showing that the deployment is successful, pods are running, and the service can be accessed via an external IP or port forwarding.
-
-    Take a screenshot showing that you can access the application after deployment.
-
+    access the wordle app from this link http://a9e8c28be83a546e7a13235d18d911e3-388845730.us-west-2.elb.amazonaws.com/

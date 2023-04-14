@@ -114,8 +114,14 @@ jobs:
       - run:
           name: create cluster
           command: |
-            echo "Create Cluster"
-            eksctl create cluster --config-file=cluster.yml
+            aws eks describe-cluster --name wordle > /dev/null
+            if [ $? -eq 0 ] 
+            then   
+              echo "Cluster already exists"; 
+            else
+              echo "Create Cluster"
+              eksctl create cluster --config-file=cluster.yml
+            fi
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
