@@ -35,8 +35,8 @@ commands:
             kubectl delete -f deployment/
             eksctl delete cluster wordle-${CIRCLE_WORKFLOW_ID:0:7}
 
-  destroy-blue-environment:
-    description: Destroy blue versrion stack given a workflow ID.
+  destroy-old-version:
+    description: Destroy old version stack given a workflow ID.
     parameters:
       # Added workflow ID for destroying the environment related files
       Workflow_ID:
@@ -121,7 +121,7 @@ jobs:
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
-  create-green-cluster:
+  create-infrastructure:
     executor: aws-eks/python3
     steps:
       - checkout
@@ -146,7 +146,7 @@ jobs:
       # Here's where you will add some code to rollback on failure  
       - destroy-environment
 
-  deploy-green-cluster:
+  deploy-app:
     executor: aws-eks/python3
     steps:
       - checkout
@@ -193,11 +193,11 @@ workflows:
       - build-lint
       - build-docker-image:
           requires: [build-lint]
-      - create-green-cluster:
+      - create-infrastructure:
           requires: [build-docker-image]
-      - deploy-green-cluster:
-          requires: [create-green-cluster]
+      - deploy-app:
+          requires: [create-infrastructure]
       - smoke-test:
-          requires: [deploy-green-cluster]
-      - destroy-blue-version:
+          requires: [deploy-app]
+      - destroy-old-version:
           requires: [smoke-test]
