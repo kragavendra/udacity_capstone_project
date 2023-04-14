@@ -111,7 +111,7 @@ jobs:
       - checkout
       - install-eksctl
       - install-awscli
-      - install-kubectl
+      - kubernetes/install-kubectl
       - run:
           name: create cluster
           command: |
@@ -126,7 +126,7 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
-      - install-kubectl
+      - kubernetes/install-kubectl
       - install-awscli
       - run:
           name: connect to eks cluster
@@ -158,7 +158,7 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
-      - install-kubectl
+      - kubernetes/install-kubectl
       - install-awscli
       - run:
           name: connect to eks cluster
