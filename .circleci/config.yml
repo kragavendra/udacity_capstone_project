@@ -150,7 +150,7 @@ jobs:
       - run:
           name: rolling update
           command: |
-            kubectl set image deployment.apps/wordle mycontainer=kragavendra1100/wordle
+            kubectl set image deployment.apps/wordle wordle=kragavendra1100/wordle
       - run:
           name: watch rollout
           command: | 
